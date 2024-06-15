@@ -3,54 +3,59 @@ include Irvine32.inc
 
 .data
 
-line1 byte "The value off the element a[2,2] is : ",0
-line2 byte "The sum a[2,2] + z = : ",0
-line3 byte "The sum a[2,2] - z = : ",0
+line1 byte "The value off the element a[2,2] is : ",0   ; String for line 1 output
+line2 byte "The sum a[2,2] + z = : ",0                ; String for line 2 output
+line3 byte "The sum a[2,2] - z = : ",0                ; String for line 3 output
 
-a sdword 00d, 10d, 20d, 30d,
-		01d, 11d, 21d, 32d,
-		02d, 12d, 22d, 32d,
-		03d, 13d, 23d, 33d
+a sdword 00d, 10d, 20d, 30d,    ; Define a 4x4 matrix 'a' in row-major order
+        01d, 11d, 21d, 32d,
+        02d, 12d, 22d, 32d,
+        03d, 13d, 23d, 33d
 
-x byte 2d
-y byte 2d
-z sbyte -30d
+x byte 2d      ; Initialize x with value 2 (row index)
+y byte 2d      ; Initialize y with value 2 (column index)
+z sbyte -30d   ; Initialize z with value -30
 
-p_xy dword ?
+p_xy dword ?   ; Define variable p_xy as a signed doubleword (initialized to 0)
 
 
 .code
 main proc
-mov esi, type a
-shl esi, 1
-movzx ecx, y
-add esi, ecx
-shl esi, 2
-add esi, offset a
 
-mov ebx, esi
+mov esi, type a   ; Move the size of 'a' (16 bytes) into esi
+shl esi, 1        ; Multiply esi by 2 (size of each element in a doubleword)
+movzx ecx, y      ; Zero-extend y (2) into ecx
+add esi, ecx      ; Add y to esi (esi now points to the start of row 2 in 'a')
+shl esi, 2        ; Multiply esi by 4 (each row in 'a' is 4 bytes)
+add esi, offset a ; Add the offset of 'a' to esi (esi points to a[2,2])
 
-
-mov eax,[ebx]	; transfer value of pointer to eax 
-mov edx,offset line1	; move the first line string to edx for printing
-call WriteString	; print the first line
-call WriteInt	; print value of a[x,y]
-call Crlf	; print new line
+mov ebx, esi      ; Copy esi (pointer to a[2,2]) to ebx
 
 
-movsx ecx,z ; transfer z to ecx with leading zeros 16bit -> 32bit
-add eax,ecx	; add z to a[x,y] : a[x,y] + z
-mov edx,offset line2	; move the second line string to edx for printing
-call WriteString	; print the second line
-call WriteInt	; print value of a[x,y] + z to the screen
-call Crlf	; print new line
+; Output line 1: "The value off the element a[2,2] is : "
+mov eax, [ebx]    ; Move the value at a[2,2] into eax
+mov edx, offset line1  ; Move the address of line1 into edx
+call WriteString  ; Call Irvine32 procedure to write the string at edx
+call WriteInt     ; Call Irvine32 procedure to write the integer value in eax (a[2,2])
+call Crlf         ; Call Irvine32 procedure to output a newline
 
-mov eax,[ebx]	; transfer value of pointer to eax 
-sub eax,ecx	; subtract z from a[x,y] : a[x,y] - z
-mov edx,offset line2	; move the third line string to edx for printing
-call WriteString	; print the third line
-call WriteInt	; print value of a[x,y] - z to the screen
-call Crlf	; print new line
+
+; Output line 2: "The sum a[2,2] + z = : "
+movsx ecx, z      ; Sign-extend z (-30) into ecx
+add eax, ecx      ; Add z to eax (eax = a[2,2] + z)
+mov edx, offset line2  ; Move the address of line2 into edx
+call WriteString  ; Call Irvine32 procedure to write the string at edx
+call WriteInt     ; Call Irvine32 procedure to write the integer value in eax (sum of a[2,2] + z)
+call Crlf         ; Call Irvine32 procedure to output a newline
+
+
+; Output line 3: "The sum a[2,2] - z = : "
+mov eax, [ebx]    ; Move the value at a[2,2] back into eax
+sub eax, ecx      ; Subtract z from eax (eax = a[2,2] - z)
+mov edx, offset line3  ; Move the address of line3 into edx
+call WriteString  ; Call Irvine32 procedure to write the string at edx
+call WriteInt     ; Call Irvine32 procedure to write the integer value in eax (sum of a[2,2] - z)
+call Crlf         ; Call Irvine32 procedure to output a newline
 
 exit
 main endp
